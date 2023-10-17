@@ -128,7 +128,7 @@ class Bomb:
         self.img.set_colorkey((0, 0, 0))
         self.rct = self.img.get_rect()
         self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)      
-        self.vx, self.vy = +5, +5
+        #self.vx, self.vy = +5, +5
         self.vx = random.choice(__class__.directions)
         self.vy = random.choice(__class__.directions)
 
@@ -144,6 +144,9 @@ class Bomb:
             self.vy *= -1
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
+        
+    
+
 
 
 def main():
@@ -179,9 +182,9 @@ def main():
             
         for i, bomb in enumerate(bombs):
             if beam is not None:
-                if beam.rct.colliderect(bomb.rct):
-                    beam = None
+                if bomb.rct.colliderect(beam.rct):
                     bombs[i] = None
+                    beam = None
                     bird.change_img(6, screen)
                     pg.display.update()
         bombs = [bomb for bomb in bombs if bomb is not None]        
