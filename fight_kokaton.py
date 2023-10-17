@@ -105,7 +105,30 @@ class Beam:
         """
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
-            
+ 
+
+class Explosion:
+    """
+    爆発エフェクトに関するクラス
+    """
+    def __init__(self, center):
+        self.images = [pg.image.load(f"ex03/fig/explosion.gif")]
+        self.images += [pg.transform.flip(img, True, False) for img in self.images]  # 左右に反転した画像を追加
+        self.index = 0
+        self.image = self.images[self.index]
+        self.rct = self.image.get_rect()
+        self.rct.center = center
+        self.life = 10
+
+    def update(self):
+        self.life -= 1
+        if self.life <= 0:
+            return True  # 爆発が終了したことを示すためにTrueを返す
+        if self.index < len(self.images) - 1:
+            self.index += 1
+        self.image = self.images[self.index]
+        return False  # 爆発が続行中であることを示すためにFalseを返す  
+
 
 class Bomb:
     """
@@ -128,7 +151,7 @@ class Bomb:
         self.img.set_colorkey((0, 0, 0))
         self.rct = self.img.get_rect()
         self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)      
-        self.vx, self.vy = +5, +5
+        #self.vx, self.vy = +5, +5
         self.vx = random.choice(__class__.directions)
         self.vy = random.choice(__class__.directions)
 
@@ -144,6 +167,10 @@ class Bomb:
             self.vy *= -1
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
+        
+    
+#class multibeam:
+    #Beams = []
 
 
 def main():
@@ -157,6 +184,7 @@ def main():
 
     clock = pg.time.Clock()
     tmr = 0
+    explosions = []
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -178,14 +206,21 @@ def main():
                 return
             
         for i, bomb in enumerate(bombs):
-            if beam is not None:
+            if beam is not None and bomb is not None:
                 if beam.rct.colliderect(bomb.rct):
-                    beam = None
+                    explosions.append(Explosion(bomb.rct.center))
                     bombs[i] = None
+                    beam = None
                     bird.change_img(6, screen)
                     pg.display.update()
-        bombs = [bomb for bomb in bombs if bomb is not None]        
+        bombs = [bomb for bomb in bombs if bomb is not None]    
+        
+        explosions = [explosion for explosion in explosions if not explosion.update()]  
+        #print(explosions)
+        for explosion in explosions:
+            screen.blit(explosion.image, explosion.rct)   
             
+                    
                     
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
